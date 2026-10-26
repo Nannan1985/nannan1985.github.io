@@ -1,0 +1,24 @@
+// Editorial diagrams, not screenshots or measured movie data.
+const palette = ['#8d775d', '#b3a18b', '#5e756e', '#405b63', '#85938c', '#c5b698', '#706c61', '#3d4747'];
+const bands = (count, height = 74) => Array.from({length:count}, (_, i) => `<rect x="${20 + i * 12}" y="45" width="12" height="${height}" fill="${palette[i % palette.length]}"/>`).join('');
+const figureShell = (name, title, content, caption, conceptualLabel) => `<figure class="process-figure process-${name}" aria-label="${title}"><div class="process-topline"><span>${title}</span><span>${conceptualLabel}</span></div>${content.replace('<g stroke=', '<g fill="none" stroke=')}<figcaption>${caption}</figcaption></figure>`;
+const { diagramEnglish } = await import(`../content/diagram-translations.mjs?build=${Date.now()}`);
+const escapeText = text => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+export function processFigure(id, locale = 'zh') {
+  const t = text => {
+    if (locale === 'en' && !(text in diagramEnglish)) throw new Error(`Missing English diagram copy: ${text}`);
+    return escapeText(locale === 'en' ? diagramEnglish[text] : text);
+  };
+  const shell = (...args) => figureShell(...args, t('思路示意'));
+  if (id === 'starting-point') return shell('origin', t('01 / 从存放到探索'), `
+    <div class="process-pair"><div class="process-cell"><span class="process-label">${t('原来的入口')}</span><div class="file-stack" aria-hidden="true"><span><i></i>${t('影片 A')}<span>${t('文件')}</span></span><span><i></i>${t('影片 B')}<span>${t('文件')}</span></span><span><i></i>${t('影片 C')}<span>${t('文件')}</span></span></div><strong>${t('一份列表')}</strong></div>
+    <div class="process-cell"><span class="process-label">${t('新的入口')}</span><svg viewBox="0 0 300 170" aria-hidden="true"><g stroke="#7b877c" stroke-width="1.5"><path d="M60 114 147 47 232 107 118 138 60 114M147 47 118 138M147 47 266 36"/></g><g fill="#c4b597"><circle cx="60" cy="114" r="8"/><circle cx="147" cy="47" r="13"/><circle cx="232" cy="107" r="9"/><circle cx="118" cy="138" r="6"/><circle cx="266" cy="36" r="5"/></g></svg><strong>${t('多条可继续追问的线索')}</strong></div></div>
+    <div class="concept-tags"><span>${t('类型')}</span><span>${t('国家 / 地区')}</span><span>${t('导演')}</span><span>${t('年份')}</span></div>`, t('先把影片当作可继续认识的材料，再为资料之间的联系建立浏览入口。节点与连线仅为概念示意，不对应实际影片或布局计算。'));
+  if (id === 'visual-language') {
+    const arcs = Array.from({length:32}, (_, i) => `<circle cx="150" cy="105" r="71" fill="none" stroke="${palette[i % palette.length]}" stroke-width="29" stroke-dasharray="12.9 433.2" transform="rotate(${i * 11.25 - 87} 150 105)"/>`).join('');
+    return shell('language', t('02 / 让时间获得形状'), `<div class="process-pair"><div class="process-cell"><span class="process-label">${t('从左到右 · 时间展开')}</span><svg viewBox="0 0 300 210" aria-hidden="true">${bands(22)}<path d="M20 151H284m-7-5 7 5-7 5" stroke="#b8bdb0" fill="none"/><path d="M146 36v94" stroke="#f1ecdf" stroke-width="2"/></svg><strong>${t('色彩随时间排列')}</strong></div><div class="process-cell"><span class="process-label">${t('顺时针 · 首尾相邻')}</span><svg viewBox="0 0 300 210" aria-hidden="true">${arcs}<rect x="116" y="81" width="68" height="44" rx="2" fill="#343d3a" stroke="#9ca994"/><path d="m116 111 18-16 16 10 14-13 20 19" fill="none" stroke="#c4b597"/><path d="M150 27V16" stroke="#efeadc" stroke-width="2"/></svg><strong>${t('色环与一个具体画面')}</strong></div></div><div class="concept-bridge">${t('时间位置')} <span aria-hidden="true">↔</span> ${t('色环 / 色带')} <span aria-hidden="true">↔</span> ${t('对应画面')}</div>`, t('把线性的时间围成一个圆，让全片轮廓与某一刻的画面同时可见。配色用于解释表达方式，并非某部影片的采样结果。'));
+  }
+  if (id === 'collection') return shell('collection', t('03 / 为个人选择保留边界'), `<div class="collection-concept"><div class="collection-mosaic" aria-hidden="true">${Array.from({length:48}, (_, i) => `<i class="${[2,7,10,11,17,20,23,26,32,35,39,40,43,46,47].includes(i) ? 'unfilled' : ''}" style="--tile:${palette[i % palette.length]}"></i>`).join('')}</div><div class="collection-principle"><strong>${t('一份收藏，')}<br>${t('不是一个全集。')}</strong><span>${t('年代不均匀')}</span><span>${t('导演与系列可能有缺口')}</span><span>${t('未收录不等于价值判断')}</span></div></div>`, t('实色与空格表达“有所收录，也有留白”。格子的数量和比例不代表片库统计，留白不是等待补齐的任务表。'));
+  if (id === 'next') return shell('next', t('04 / 从使用中继续修正'), `<ol class="evolution-path"><li><span class="evolution-symbol" aria-hidden="true">↺</span><strong>${t('修正信息')}</strong><span>${t('让已有资料更准确')}</span></li><li><span class="evolution-symbol" aria-hidden="true">↔</span><strong>${t('改善浏览')}</strong><span>${t('让移动阅读更顺畅')}</span></li><li><span class="evolution-symbol" aria-hidden="true">＋</span><strong>${t('少量补充')}</strong><span>${t('随着个人兴趣扩展')}</span></li></ol><div class="evolution-baseline">${t('维持作品体验，保留个人节奏。')}</div>`, t('三个持续关注的方向，没有先后排期，也不承诺固定频率或完整覆盖。'));
+  return '';
+}
